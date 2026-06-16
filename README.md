@@ -4,21 +4,21 @@ A modern, full-stack enterprise data warehouse and business intelligence dashboa
 
 ## System Architecture
 
-The project consists of three main components:
+The project consists of three main components, each documented in its own guide:
 
-1. **Data Warehouse & ETL Pipeline (SSIS) (`/EnterpriseDWH`)**:
-   - SSIS Packages (`Dimensions.dtsx`, `Fact.dtsx`) to extract, transform, and load source data into the Enterprise Data Warehouse.
-   
-2. **OLAP Multi-dimensional Cube (SSAS) (`/EnterpriseCube`)**:
+1. **OLAP Multi-dimensional Cube (SSAS) ([cube.md](file:///d:/DWarehouse/EnterpriseProject/cube.md))**:
    - Multi-dimensional Cube definition for dimensional modeling (Geography, Suppliers, Products, Date, and Time).
+   
+2. **Data Warehouse & ETL Pipeline (SSIS) ([etl.md](file:///d:/DWarehouse/EnterpriseProject/etl.md))**:
+   - SSIS Packages (`Dimensions.dtsx`, `Fact.dtsx`) to extract, transform, and load source data into the Enterprise Data Warehouse.
 
-3. **Web API Service (`/EnterpriseDWH/EnterpriseDashboard/EnterpriseDashboard.API`)**:
-   - Built on **ASP.NET Core**.
+3. **Web API Service ([dashboard.md](file:///d:/DWarehouse/EnterpriseProject/dashboard.md))**:
+   - Built on **ASP.NET Core** at `/EnterpriseDashboard.API`.
    - Interfaces directly with the SSAS OLAP cube via connection strings executing MDX (Multi-Dimensional eXpressions) queries.
    - Exposes REST API endpoints for KPI summaries, drill-downs, filters, rankings, and logistics performance.
 
-4. **Frontend Dashboard (`/EnterpriseDWH/EnterpriseDashboard/EnterpriseDashboard.UI`)**:
-   - Built with **Vite**, **React**, **TypeScript**, and **Tailwind CSS**.
+4. **Frontend Dashboard ([dashboard.md](file:///d:/DWarehouse/EnterpriseProject/dashboard.md))**:
+   - Built with **Vite**, **React**, **TypeScript**, and **Tailwind CSS** at `/EnterpriseDashboard.UI`.
    - Fully interactive visualizations using **Recharts** (multicolored bar charts, area charts, and custom label donut charts).
    - Dynamic leaflet maps for geographic spend drill-downs.
    - Modern glassmorphism UI with seamless Light/Dark mode support.
@@ -43,7 +43,7 @@ The project consists of three main components:
 
 1. Navigate to the API directory:
    ```bash
-   cd EnterpriseDWH/EnterpriseDashboard/EnterpriseDashboard.API
+   cd EnterpriseDashboard.API
    ```
 2. Run the development server:
    ```bash
@@ -55,7 +55,7 @@ The project consists of three main components:
 
 1. Navigate to the UI directory:
    ```bash
-   cd EnterpriseDWH/EnterpriseDashboard/EnterpriseDashboard.UI
+   cd EnterpriseDashboard.UI
    ```
 2. Install dependencies:
    ```bash
@@ -66,3 +66,4 @@ The project consists of three main components:
    npm run dev
    ```
    Open `http://localhost:5173` in your browser.
+
