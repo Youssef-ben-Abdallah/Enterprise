@@ -32,7 +32,7 @@ export function GlobalFilterBar({ selectedMonth, setSelectedMonth, selectedSuppl
           { value: selectedSupplier, onChange: setSelectedSupplier, options: suppliers, placeholder: 'All Suppliers' },
           { value: selectedCountry, onChange: setSelectedCountry, options: locations, placeholder: 'All Countries' },
         ].map((sel, i) => (
-          <select key={i} value={sel.value} onChange={e => sel.onChange(e.target.value)} className="themed-input flex-1 appearance-none">
+          <select key={i} value={sel.value} onChange={e => sel.onChange(e.target.value)} className="themed-input flex-1 appearance-none cursor-pointer text-xs" style={{ paddingLeft: '0.75rem' }}>
             <option value="">{sel.placeholder}</option>
             {(sel.options || []).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>

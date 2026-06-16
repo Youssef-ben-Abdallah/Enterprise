@@ -6,16 +6,18 @@ A modern, full-stack enterprise data warehouse and business intelligence dashboa
 
 The project consists of three main components:
 
-1. **Data Warehouse & ETL Pipeline (SSIS)**:
+1. **Data Warehouse & ETL Pipeline (SSIS) (`/EnterpriseDWH`)**:
    - SSIS Packages (`Dimensions.dtsx`, `Fact.dtsx`) to extract, transform, and load source data into the Enterprise Data Warehouse.
-   - OLAP Multi-dimensional Cube (SSAS) definition for dimensional modeling (Geography, Suppliers, Products, Date, and Time).
+   
+2. **OLAP Multi-dimensional Cube (SSAS) (`/EnterpriseCube`)**:
+   - Multi-dimensional Cube definition for dimensional modeling (Geography, Suppliers, Products, Date, and Time).
 
-2. **Web API Service (`/EnterpriseDashboard.API`)**:
+3. **Web API Service (`/EnterpriseDWH/EnterpriseDashboard/EnterpriseDashboard.API`)**:
    - Built on **ASP.NET Core**.
    - Interfaces directly with the SSAS OLAP cube via connection strings executing MDX (Multi-Dimensional eXpressions) queries.
    - Exposes REST API endpoints for KPI summaries, drill-downs, filters, rankings, and logistics performance.
 
-3. **Frontend Dashboard (`/EnterpriseDashboard.UI`)**:
+4. **Frontend Dashboard (`/EnterpriseDWH/EnterpriseDashboard/EnterpriseDashboard.UI`)**:
    - Built with **Vite**, **React**, **TypeScript**, and **Tailwind CSS**.
    - Fully interactive visualizations using **Recharts** (multicolored bar charts, area charts, and custom label donut charts).
    - Dynamic leaflet maps for geographic spend drill-downs.
@@ -41,7 +43,7 @@ The project consists of three main components:
 
 1. Navigate to the API directory:
    ```bash
-   cd EnterpriseDashboard/EnterpriseDashboard.API
+   cd EnterpriseDWH/EnterpriseDashboard/EnterpriseDashboard.API
    ```
 2. Run the development server:
    ```bash
@@ -53,7 +55,7 @@ The project consists of three main components:
 
 1. Navigate to the UI directory:
    ```bash
-   cd EnterpriseDashboard/EnterpriseDashboard.UI
+   cd EnterpriseDWH/EnterpriseDashboard/EnterpriseDashboard.UI
    ```
 2. Install dependencies:
    ```bash
