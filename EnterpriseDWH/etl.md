@@ -1,6 +1,6 @@
 # ETL Pipeline & Data Warehouse (SSIS)
 
-This directory (`/EnterpriseDWH`) contains the SQL Server Integration Services (SSIS) project responsible for the Extract, Transform, and Load (ETL) pipeline. It populates the Enterprise Data Warehouse from transactional source databases.
+This directory contains the SQL Server Integration Services (SSIS) project responsible for the Extract, Transform, and Load (ETL) pipeline. It populates the Enterprise Data Warehouse from transactional source databases.
 
 ## Project Structure
 

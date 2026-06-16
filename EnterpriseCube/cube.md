@@ -1,6 +1,6 @@
 # OLAP Multi-dimensional Cube (SSAS)
 
-This directory (`/EnterpriseCube`) contains the SQL Server Analysis Services (SSAS) Multidimensional project. It models enterprise procurement and logistics data to enable high-performance, complex analytical queries (MDX).
+This project models enterprise procurement and logistics data to enable high-performance, complex analytical queries (MDX).
 
 ## Project Structure
 

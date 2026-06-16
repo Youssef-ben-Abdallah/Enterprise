@@ -2,26 +2,21 @@
 
 A modern, full-stack enterprise data warehouse and business intelligence dashboard for procurement and logistics tracking. 
 
-## System Architecture
+## System Architecture & Project Structure
 
-The project consists of three main components, each documented in its own guide:
+The project consists of four main components, each documented in its own guide within its directory:
 
-1. **OLAP Multi-dimensional Cube (SSAS) ([cube.md](file:///d:/DWarehouse/EnterpriseProject/cube.md))**:
+1. **OLAP Multi-dimensional Cube (SSAS) ([cube.md](file:///d:/DWarehouse/EnterpriseProject/EnterpriseCube/cube.md))**:
    - Multi-dimensional Cube definition for dimensional modeling (Geography, Suppliers, Products, Date, and Time).
    
-2. **Data Warehouse & ETL Pipeline (SSIS) ([etl.md](file:///d:/DWarehouse/EnterpriseProject/etl.md))**:
+2. **Data Warehouse & ETL Pipeline (SSIS) ([etl.md](file:///d:/DWarehouse/EnterpriseProject/EnterpriseDWH/etl.md))**:
    - SSIS Packages (`Dimensions.dtsx`, `Fact.dtsx`) to extract, transform, and load source data into the Enterprise Data Warehouse.
 
-3. **Web API Service ([dashboard.md](file:///d:/DWarehouse/EnterpriseProject/dashboard.md))**:
-   - Built on **ASP.NET Core** at `/EnterpriseDashboard.API`.
-   - Interfaces directly with the SSAS OLAP cube via connection strings executing MDX (Multi-Dimensional eXpressions) queries.
-   - Exposes REST API endpoints for KPI summaries, drill-downs, filters, rankings, and logistics performance.
+3. **Web API Service ([api.md](file:///d:/DWarehouse/EnterpriseProject/EnterpriseDashboard.API/api.md))**:
+   - ASP.NET Core API at `/EnterpriseDashboard.API` that queries the SSAS Cube using MDX.
 
-4. **Frontend Dashboard ([dashboard.md](file:///d:/DWarehouse/EnterpriseProject/dashboard.md))**:
-   - Built with **Vite**, **React**, **TypeScript**, and **Tailwind CSS** at `/EnterpriseDashboard.UI`.
-   - Fully interactive visualizations using **Recharts** (multicolored bar charts, area charts, and custom label donut charts).
-   - Dynamic leaflet maps for geographic spend drill-downs.
-   - Modern glassmorphism UI with seamless Light/Dark mode support.
+4. **Frontend Dashboard ([frontend.md](file:///d:/DWarehouse/EnterpriseProject/EnterpriseDashboard.UI/frontend.md))**:
+   - React + TypeScript dashboard at `/EnterpriseDashboard.UI` featuring interactive data visualizations.
 
 ## Key Features
 
