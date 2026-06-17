@@ -6,17 +6,45 @@ A modern, full-stack enterprise data warehouse and business intelligence dashboa
 
 The project consists of four main components, each documented in its own guide within its directory:
 
-1. **OLAP Multi-dimensional Cube (SSAS) ([cube.md](file:///d:/DWarehouse/EnterpriseProject/EnterpriseCube/cube.md))**:
+1. **OLAP Multi-dimensional Cube (SSAS) ([EnterpriseCube/README.md](EnterpriseCube/README.md))**:
    - Multi-dimensional Cube definition for dimensional modeling (Geography, Suppliers, Products, Date, and Time).
    
-2. **Data Warehouse & ETL Pipeline (SSIS) ([etl.md](file:///d:/DWarehouse/EnterpriseProject/EnterpriseDWH/etl.md))**:
+2. **Data Warehouse & ETL Pipeline (SSIS) ([EnterpriseDWH/README.md](EnterpriseDWH/README.md))**:
    - SSIS Packages (`Dimensions.dtsx`, `Fact.dtsx`) to extract, transform, and load source data into the Enterprise Data Warehouse.
 
-3. **Web API Service ([api.md](file:///d:/DWarehouse/EnterpriseProject/EnterpriseDashboard.API/api.md))**:
+3. **Web API Service ([EnterpriseDashboard.API/README.md](EnterpriseDashboard.API/README.md))**:
    - ASP.NET Core API at `/EnterpriseDashboard.API` that queries the SSAS Cube using MDX.
 
-4. **Frontend Dashboard ([frontend.md](file:///d:/DWarehouse/EnterpriseProject/EnterpriseDashboard.UI/frontend.md))**:
+4. **Frontend Dashboard ([EnterpriseDashboard.UI/README.md](EnterpriseDashboard.UI/README.md))**:
    - React + TypeScript dashboard at `/EnterpriseDashboard.UI` featuring interactive data visualizations.
+
+## Dashboard Showcase
+
+Here is a visual overview of the different interactive views available in the Enterprise Dashboard:
+
+### 1. Overview Dashboard
+Displays high-level KPIs (Spend, Volume, Fill Rate), logistics health, inventory volumes, and spend trends.
+![Overview Dashboard](docs/images/overview.png)
+
+### 2. Product Analysis
+Shows spend distribution by categories and the top products.
+![Product Analysis](docs/images/products.png)
+
+### 3. Location Drilldowns
+Provides geographic spend analysis with interactive drilldown maps and tables.
+![Location Drilldowns](docs/images/locations.png)
+
+### 4. Time Intelligence
+Aggregates and filters spend trends across years, quarters, and days.
+![Time Intelligence](docs/images/time.png)
+
+### 5. Delivery Performance
+Tracks purchase orders, actual/expected timelines, and delay metrics.
+![Delivery Performance](docs/images/delivery.png)
+
+### 6. Supplier Performance
+Ranks suppliers based on spend volume and delivery precision.
+![Supplier Performance](docs/images/suppliers.png)
 
 ## Key Features
 

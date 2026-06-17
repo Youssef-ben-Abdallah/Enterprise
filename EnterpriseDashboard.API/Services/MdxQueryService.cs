@@ -31,7 +31,24 @@ public class MdxQueryService : IMdxQueryService
     public async Task<KpiSummaryDto> GetKpiSummaryAsync()
     {
         var mdx = @"
-            ";
+            WITH 
+              MEMBER [Measures].[Dynamic_YTD] AS
+                SUM(
+                  YTD( TAIL(NONEMPTY([Order Date].[Calendar].[Month Name].Members, [Measures].[Total Amount]), 1).Item(0) ),
+                  [Measures].[Total Amount]
+                )
+              MEMBER [Measures].[Dynamic_Prev] AS
+                ( ParallelPeriod([Order Date].[Calendar].[Year], 1, TAIL(NONEMPTY([Order Date].[Calendar].[Month Name].Members, [Measures].[Total Amount]), 1).Item(0).Parent), [Measures].[Total Amount] )
+              MEMBER [Measures].[Dynamic_Growth] AS
+                IIF([Measures].[Dynamic_Prev] = 0 OR IsEmpty([Measures].[Dynamic_Prev]), NULL, 
+                  ([Measures].[Total Amount] - [Measures].[Dynamic_Prev]) / [Measures].[Dynamic_Prev]
+                )
+            SELECT
+              { [Measures].[Total Spend], [Measures].[Total Orders],
+                [Measures].[Fill Rate], [Measures].[Dynamic_YTD],
+                [Measures].[Dynamic_Growth], [Measures].[Average Order Value],
+                [Measures].[Total Quantity Ordered], [Measures].[Total Quantity Received] } ON COLUMNS
+            FROM [Enterprise DWH]";
 
         using var connection = _connectionFactory.CreateConnection();
         using var command = new AdomdCommand(mdx, connection);
