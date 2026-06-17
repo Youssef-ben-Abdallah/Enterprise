@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchSpendByTime } from '../api/apiClient';
-import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area } from 'recharts';
+import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area, ComposedChart, Line } from 'recharts';
 import { ChevronRight, Calendar } from 'lucide-react';
 import { formatCurrency, formatCurrencyAxis } from '../utils/currency';
 import { useTheme } from '../context/ThemeContext';
@@ -77,7 +77,7 @@ export function TimeIntelligence() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* Area Chart */}
+          {/* Area/Line Chart */}
           <div className="glass-card p-5 h-[440px] flex flex-col">
             <div className="mb-4">
               <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{getTitle()}</h3>
@@ -85,7 +85,7 @@ export function TimeIntelligence() {
             </div>
             <div className="flex-1">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={spendData || []} onClick={handleChartClick} style={{ cursor: currentQuarter !== null ? 'default' : 'pointer' }}>
+                <ComposedChart data={spendData || []} onClick={handleChartClick} style={{ cursor: currentQuarter !== null ? 'default' : 'pointer' }}>
                   <defs>
                     <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.25} />
@@ -95,9 +95,10 @@ export function TimeIntelligence() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
                   <XAxis dataKey="label" stroke="var(--chart-axis)" tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} />
                   <YAxis stroke="var(--chart-axis)" tickFormatter={formatCurrencyAxis} tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} />
-                  <Tooltip formatter={(value) => [formatCurrency(value as number), 'Spend']} contentStyle={tooltipStyle} cursor={{ stroke: 'var(--border-accent)' }} />
-                  <Area type="monotone" dataKey="value" stroke="var(--accent)" strokeWidth={2} fill="url(#areaGrad)" dot={false} activeDot={{ r: 5, fill: 'var(--accent)' }} />
-                </AreaChart>
+                  <Tooltip formatter={(value, name) => [formatCurrency(value as number), name === 'secondaryValue' ? '3-Mo Rolling Avg' : 'Spend']} contentStyle={tooltipStyle} cursor={{ stroke: 'var(--border-accent)' }} />
+                  <Area type="monotone" dataKey="value" name="value" stroke="var(--accent)" strokeWidth={2} fill="url(#areaGrad)" dot={false} activeDot={{ r: 5, fill: 'var(--accent)' }} />
+                  <Line type="monotone" dataKey="secondaryValue" name="secondaryValue" stroke="#f59e0b" strokeWidth={2} strokeDasharray="5 5" dot={false} activeDot={{ r: 4 }} />
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
           </div>

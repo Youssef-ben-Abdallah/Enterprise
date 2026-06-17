@@ -34,20 +34,55 @@ public class MdxQueryService : IMdxQueryService
             WITH 
               MEMBER [Measures].[Dynamic_YTD] AS
                 SUM(
-                  YTD( TAIL(NONEMPTY([Order Date].[Calendar].[Month Name].Members, [Measures].[Total Amount]), 1).Item(0) ),
-                  [Measures].[Total Amount]
+                  YTD( TAIL(NONEMPTY([Order Date].[Calendar].[Month Name].Members, [Measures].[Total Spend]), 1).Item(0) ),
+                  [Measures].[Total Spend]
                 )
               MEMBER [Measures].[Dynamic_Prev] AS
-                ( ParallelPeriod([Order Date].[Calendar].[Year], 1, TAIL(NONEMPTY([Order Date].[Calendar].[Month Name].Members, [Measures].[Total Amount]), 1).Item(0).Parent), [Measures].[Total Amount] )
+                ( ParallelPeriod([Order Date].[Calendar].[Year], 1, TAIL(NONEMPTY([Order Date].[Calendar].[Month Name].Members, [Measures].[Total Spend]), 1).Item(0).Parent), [Measures].[Total Spend] )
               MEMBER [Measures].[Dynamic_Growth] AS
                 IIF([Measures].[Dynamic_Prev] = 0 OR IsEmpty([Measures].[Dynamic_Prev]), NULL, 
-                  ([Measures].[Total Amount] - [Measures].[Dynamic_Prev]) / [Measures].[Dynamic_Prev]
+                  ([Measures].[Total Spend] - [Measures].[Dynamic_Prev]) / [Measures].[Dynamic_Prev]
+                )
+              MEMBER [Measures].[MoM_Spend_Growth] AS
+                IIF(
+                    IsEmpty(([Measures].[Total Spend], TAIL(NONEMPTY([Order Date].[Calendar].[Month Name].Members, [Measures].[Total Spend]), 1).Item(0).PrevMember)) 
+                    OR ([Measures].[Total Spend], TAIL(NONEMPTY([Order Date].[Calendar].[Month Name].Members, [Measures].[Total Spend]), 1).Item(0).PrevMember) = 0,
+                    NULL,
+                    (
+                      ([Measures].[Total Spend], TAIL(NONEMPTY([Order Date].[Calendar].[Month Name].Members, [Measures].[Total Spend]), 1).Item(0)) 
+                      - 
+                      ([Measures].[Total Spend], TAIL(NONEMPTY([Order Date].[Calendar].[Month Name].Members, [Measures].[Total Spend]), 1).Item(0).PrevMember)
+                    ) 
+                    / 
+                    ([Measures].[Total Spend], TAIL(NONEMPTY([Order Date].[Calendar].[Month Name].Members, [Measures].[Total Spend]), 1).Item(0).PrevMember)
+                )
+              MEMBER [Measures].[3_Month_Rolling_Avg] AS
+                IIF(
+                    IsEmpty([Measures].[Total Spend]), 
+                    NULL,
+                    Avg(LastPeriods(3, TAIL(NONEMPTY([Order Date].[Calendar].[Month Name].Members, [Measures].[Total Spend]), 1).Item(0)), [Measures].[Total Spend])
+                )
+              MEMBER [Measures].[Delayed_Orders_Count] AS
+                Count(Filter([Fact Purchases].[PO Detail ID].[PO Detail ID].Members, [Measures].[Delay Days] > 0))
+              MEMBER [Measures].[Perfect_Order_Rate] AS
+                IIF(
+                    [Measures].[Total Orders] = 0,
+                    NULL,
+                    ([Measures].[Total Orders] - [Measures].[Delayed_Orders_Count]) / [Measures].[Total Orders]
+                )
+              MEMBER [Measures].[Avg_Delay_Days] AS
+                IIF(
+                    [Measures].[Delayed_Orders_Count] = 0,
+                    NULL,
+                    [Measures].[Delay Days] / [Measures].[Delayed_Orders_Count]
                 )
             SELECT
               { [Measures].[Total Spend], [Measures].[Total Orders],
                 [Measures].[Fill Rate], [Measures].[Dynamic_YTD],
                 [Measures].[Dynamic_Growth], [Measures].[Average Order Value],
-                [Measures].[Total Quantity Ordered], [Measures].[Total Quantity Received] } ON COLUMNS
+                [Measures].[Total Quantity Ordered], [Measures].[Total Quantity Received],
+                [Measures].[MoM_Spend_Growth], [Measures].[3_Month_Rolling_Avg],
+                [Measures].[Perfect_Order_Rate], [Measures].[Avg_Delay_Days] } ON COLUMNS
             FROM [Enterprise DWH]";
 
         using var connection = _connectionFactory.CreateConnection();
@@ -67,6 +102,10 @@ public class MdxQueryService : IMdxQueryService
             summary.AvgOrderValue = GetDecimalSafe(reader, 5);
             summary.TotalQtyOrdered = GetDecimalSafe(reader, 6);
             summary.TotalQtyReceived = GetDecimalSafe(reader, 7);
+            summary.MoMSpendGrowth = GetDecimalSafe(reader, 8);
+            summary.RollingAverageSpend = GetDecimalSafe(reader, 9);
+            summary.PerfectOrderRate = GetDecimalSafe(reader, 10);
+            summary.AvgDelayDays = GetDecimalSafe(reader, 11);
         }
         return summary;
     }
@@ -97,36 +136,47 @@ public class MdxQueryService : IMdxQueryService
         string mdx = "";
         int labelIndex = 0;
         int valueIndex = 1;
+        int secondaryValueIndex = 2;
+
+        string withMember = @"WITH MEMBER [Measures].[3_Month_Rolling_Avg] AS
+                IIF(
+                    IsEmpty([Measures].[Total Spend]), 
+                    NULL,
+                    Avg(LastPeriods(3, [Order Date].[Calendar].CurrentMember), [Measures].[Total Spend])
+                )";
 
         if (!year.HasValue)
         {
             // Root Level: Years
-            mdx = @"
-                SELECT [Measures].[Total Spend] ON COLUMNS,
+            mdx = $@"{withMember}
+                SELECT {{ [Measures].[Total Spend], [Measures].[3_Month_Rolling_Avg] }} ON COLUMNS,
                 NON EMPTY [Order Date].[Calendar].[Year].Members ON ROWS
                 FROM [Enterprise DWH]";
             labelIndex = 0;
             valueIndex = 1;
+            secondaryValueIndex = 2;
         }
         else if (!quarter.HasValue)
         {
             // Drill down 1: Quarters of a specific year
-            mdx = $@"
-                SELECT [Measures].[Total Spend] ON COLUMNS,
+            mdx = $@"{withMember}
+                SELECT {{ [Measures].[Total Spend], [Measures].[3_Month_Rolling_Avg] }} ON COLUMNS,
                 NON EMPTY DESCENDANTS([Order Date].[Calendar].[Year].&[{year.Value}], 1, SELF) ON ROWS
                 FROM [Enterprise DWH]";
             labelIndex = 1; // 0=Year, 1=Quarter
             valueIndex = 2; // Measure
+            secondaryValueIndex = 3;
         }
         else
         {
             // Drill down 2: Days of a specific quarter (Distance 2 because Month Name was added)
-            mdx = $@"
-                SELECT [Measures].[Total Spend] ON COLUMNS,
+            mdx = $@"{withMember}
+                SELECT {{ [Measures].[Total Spend], [Measures].[3_Month_Rolling_Avg] }} ON COLUMNS,
                 NON EMPTY DESCENDANTS([Order Date].[Calendar].[Year].&[{year.Value}].&[{quarter.Value}], 2, SELF) ON ROWS
                 FROM [Enterprise DWH]";
             labelIndex = 3; // 0=Year, 1=Quarter, 2=Month Name, 3=Day Of Month
             valueIndex = 4; // Measure
+            secondaryValueIndex = 5;
         }
 
         var results = new List<SpendByDimensionDto>();
@@ -160,7 +210,8 @@ public class MdxQueryService : IMdxQueryService
             results.Add(new SpendByDimensionDto
             {
                 Label = displayLabel,
-                Value = GetDecimalSafe(reader, valueIndex)
+                Value = GetDecimalSafe(reader, valueIndex),
+                SecondaryValue = reader.FieldCount > secondaryValueIndex ? GetDecimalSafe(reader, secondaryValueIndex) : null
             });
         }
         return results;
@@ -266,7 +317,7 @@ public class MdxQueryService : IMdxQueryService
 
         var mdx = @"
             SELECT 
-              { [Measures].[Fact Purchases Count], [Measures].[Delay Days] } ON COLUMNS,
+              { [Measures].[Total Orders], [Measures].[Delay Days] } ON COLUMNS,
               NON EMPTY [Fact Purchases].[PO Detail ID].[PO Detail ID].Members
               DIMENSION PROPERTIES 
                   MEMBER_CAPTION,

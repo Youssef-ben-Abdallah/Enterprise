@@ -16,6 +16,10 @@ export interface KpiSummary {
   avgOrderValue: number;
   ytdSpend: number;
   spendGrowth: number;
+  moMSpendGrowth: number;
+  rollingAverageSpend: number;
+  perfectOrderRate: number;
+  avgDelayDays: number;
 }
 
 export interface SpendByDimension {

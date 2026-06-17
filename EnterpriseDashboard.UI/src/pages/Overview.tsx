@@ -90,6 +90,7 @@ export function Overview() {
   const fillRatePct = (summary?.fillRate || 0) * 100;
   const spendGrowthNum = Number(summary?.spendGrowth || 0);
   const growthLabel = spendGrowthNum === 0 ? '0.0%' : `${spendGrowthNum > 0 ? '+' : ''}${(spendGrowthNum * 100).toFixed(1)}%`;
+  const moMGrowthNum = Number(summary?.moMSpendGrowth || 0);
 
   return (
     <div className="space-y-6 pb-6">
@@ -105,6 +106,14 @@ export function Overview() {
           badge={growthLabel}
           badgeIcon={TrendingUp}
           badgeColor="bg-emerald-400/10 text-emerald-400"
+          footer={
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>MoM Growth</span>
+              <span className={`text-xs font-bold ${moMGrowthNum >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {moMGrowthNum > 0 ? '+' : ''}{(moMGrowthNum * 100).toFixed(1)}%
+              </span>
+            </div>
+          }
         />
         <StatCard
           label="Total Orders"

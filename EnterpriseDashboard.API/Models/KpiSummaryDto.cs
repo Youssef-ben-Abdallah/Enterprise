@@ -10,4 +10,8 @@ public class KpiSummaryDto
     public decimal AvgOrderValue { get; set; }
     public decimal YtdSpend { get; set; }
     public decimal SpendGrowth { get; set; }
+    public decimal MoMSpendGrowth { get; set; }
+    public decimal RollingAverageSpend { get; set; }
+    public decimal PerfectOrderRate { get; set; }
+    public decimal AvgDelayDays { get; set; }
 }

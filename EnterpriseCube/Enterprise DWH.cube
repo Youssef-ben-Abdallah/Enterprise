@@ -428,7 +428,8 @@
       <Measures>
         <Measure dwd:design-time-name="78a5c326-d60a-47ff-b57b-284d2e3445ce">
           <ID>Total Amount</ID>
-          <Name>Total Amount</Name>
+          <Name>Total Spend</Name>
+          <FormatString>Standard</FormatString>
           <Source dwd:design-time-name="1109206b-eb79-4493-a57f-b670fd96cf36">
             <DataType>Double</DataType>
             <Source xsi:type="ColumnBinding" dwd:design-time-name="9bc67c50-59b0-461a-836a-927c249074af">
@@ -505,7 +506,8 @@
         </Measure>
         <Measure dwd:design-time-name="6e2a087a-8c76-4201-adda-d03dc5bfafe3">
           <ID>Ordered Quantity</ID>
-          <Name>Ordered Quantity</Name>
+          <Name>Total Quantity Ordered</Name>
+          <FormatString>Standard</FormatString>
           <Source dwd:design-time-name="04eb4258-7231-44a1-a7a4-9f6c7b4edc95">
             <DataType>Integer</DataType>
             <Source xsi:type="ColumnBinding" dwd:design-time-name="3b5d136b-6703-4a95-ae75-2de6823e1569">
@@ -516,7 +518,8 @@
         </Measure>
         <Measure dwd:design-time-name="59668b7f-fca4-43cc-8088-9717863e515c">
           <ID>Received Quantity</ID>
-          <Name>Received Quantity</Name>
+          <Name>Total Quantity Received</Name>
+          <FormatString>Standard</FormatString>
           <Source dwd:design-time-name="f52dddda-31ec-41ef-a982-10e7aa893277">
             <DataType>Integer</DataType>
             <Source xsi:type="ColumnBinding" dwd:design-time-name="986a7850-4720-4e97-a0aa-cae4b0370dc8">
@@ -549,7 +552,8 @@
         </Measure>
         <Measure dwd:design-time-name="5d521952-58e7-4a4a-aba4-1f5af2735e92">
           <ID>Fact Purchases Count</ID>
-          <Name>Fact Purchases Count</Name>
+          <Name>Total Orders</Name>
+          <FormatString>Standard</FormatString>
           <AggregateFunction>Count</AggregateFunction>
           <Source dwd:design-time-name="9fa48152-aaef-4356-8cc0-d025e9355334">
             <DataType>Integer</DataType>
@@ -727,42 +731,61 @@ If the CALCULATE command is deleted or modified, the data within the cube is aff
 You should edit this command only if you manually specify how the cube is aggregated.
 */
 CALCULATE;  
-CREATE MEMBER CURRENTCUBE.[Measures].[Total Spend]
- AS SUM([Measures].[Total Amount]), 
-FORMAT_STRING = "Standard", 
-VISIBLE = 1;  
-CREATE MEMBER CURRENTCUBE.[Measures].[Total Orders]
- AS [Measures].[Fact Purchases Count], 
-FORMAT_STRING = "Standard", 
-VISIBLE = 1;  
-CREATE MEMBER CURRENTCUBE.[Measures].[Total Quantity Ordered]
- AS [Measures].[Ordered Quantity], 
-FORMAT_STRING = "Standard", 
-VISIBLE = 1;  
-CREATE MEMBER CURRENTCUBE.[Measures].[Total Quantity Received]
- AS [Measures].[Received Quantity], 
-FORMAT_STRING = "Standard", 
-VISIBLE = 1;  
 CREATE MEMBER CURRENTCUBE.[Measures].[Fill Rate]
  AS IIF(
- [Measures].[Ordered Quantity]=0,
+ [Measures].[Total Quantity Ordered]=0,
  NULL,
- [Measures].[Received Quantity]
+ [Measures].[Total Quantity Received]
  /
- [Measures].[Ordered Quantity]
+ [Measures].[Total Quantity Ordered]
 ), 
 FORMAT_STRING = "Percent", 
 VISIBLE = 1;  
 CREATE MEMBER CURRENTCUBE.[Measures].[Average Order Value]
  AS IIF(
-    [Measures].[Fact Purchases Count] = 0,
+    [Measures].[Total Orders] = 0,
     NULL,
-    [Measures].[Total Amount]
+    [Measures].[Total Spend]
     /
-    [Measures].[Fact Purchases Count]
+    [Measures].[Total Orders]
 ), 
 FORMAT_STRING = "Standard", 
-VISIBLE = 1  ; </Text>
+VISIBLE = 1;  
+CREATE MEMBER CURRENTCUBE.[Measures].[MoM Spend Growth]
+ AS IIF(
+    IsEmpty([Measures].[Total Spend]) OR IsEmpty(([Measures].[Total Spend], [Order Date].[Calendar].CurrentMember.PrevMember)) OR ([Measures].[Total Spend], [Order Date].[Calendar].CurrentMember.PrevMember) = 0,
+    NULL,
+    ([Measures].[Total Spend] - ([Measures].[Total Spend], [Order Date].[Calendar].CurrentMember.PrevMember)) / ([Measures].[Total Spend], [Order Date].[Calendar].CurrentMember.PrevMember)
+), 
+FORMAT_STRING = "Percent", 
+VISIBLE = 1;  
+CREATE MEMBER CURRENTCUBE.[Measures].[3-Month Rolling Average Spend]
+ AS IIF(
+    IsEmpty([Measures].[Total Spend]), 
+    NULL,
+    Avg(LastPeriods(3, [Order Date].[Calendar].CurrentMember), [Measures].[Total Spend])
+), 
+FORMAT_STRING = "Standard", 
+VISIBLE = 1;  
+CREATE MEMBER CURRENTCUBE.[Measures].[Delayed Orders Count]
+ AS Count(Filter([Fact Purchases].[PO Detail ID].[PO Detail ID].Members, [Measures].[Delay Days] > 0)), 
+VISIBLE = 0;  
+CREATE MEMBER CURRENTCUBE.[Measures].[Perfect Order Rate]
+ AS IIF(
+    [Measures].[Total Orders] = 0,
+    NULL,
+    ([Measures].[Total Orders] - [Measures].[Delayed Orders Count]) / [Measures].[Total Orders]
+), 
+FORMAT_STRING = "Percent", 
+VISIBLE = 1;  
+CREATE MEMBER CURRENTCUBE.[Measures].[Avg Delay Days per Delayed Order]
+ AS IIF(
+    [Measures].[Delayed Orders Count] = 0,
+    NULL,
+    [Measures].[Delay Days] / [Measures].[Delayed Orders Count]
+), 
+FORMAT_STRING = "Standard", 
+VISIBLE = 1; </Text>
         </Command>
       </Commands>
     </MdxScript>

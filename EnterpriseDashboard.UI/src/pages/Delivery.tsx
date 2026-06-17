@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchDeliveryPerformance, fetchDeliveryKpis } from '../api/apiClient';
+import { fetchDeliveryPerformance, fetchDeliveryKpis, fetchKpiSummary } from '../api/apiClient';
 import { cn } from '../components/Layout';
 import { Search, Filter, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Clock, CheckCircle2, AlertCircle, Package } from 'lucide-react';
 
 export function Delivery() {
   const { data: delivery, isLoading } = useQuery({ queryKey: ['deliveryPerformance'], queryFn: fetchDeliveryPerformance });
   const { data: kpis, isLoading: isLoadingKpis } = useQuery({ queryKey: ['deliveryKpis'], queryFn: fetchDeliveryKpis });
+  const { data: summary, isLoading: isLoadingSummary } = useQuery({ queryKey: ['kpiSummaryDelivery'], queryFn: fetchKpiSummary });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -53,7 +54,7 @@ export function Delivery() {
 
   useEffect(() => { setCurrentPage(1); }, [searchTerm, statusFilter, columnFilters]);
 
-  if (isLoading || isLoadingKpis) return (
+  if (isLoading || isLoadingKpis || isLoadingSummary) return (
     <div className="flex items-center justify-center h-48">
       <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'var(--border)', borderTopColor: 'var(--accent)' }} />
     </div>
@@ -81,10 +82,10 @@ export function Delivery() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Deliveries', value: kpis?.totalDeliveries.toLocaleString(), icon: Package,       color: 'text-teal-400',    bg: 'bg-teal-500/10',    dot: '#2dd4bf' },
-          { label: 'On Time',          value: `${kpis?.onTimePercentage}%`,           icon: CheckCircle2,  color: 'text-blue-400',    bg: 'bg-blue-500/10',    dot: '#60a5fa' },
-          { label: 'Early',            value: `${kpis?.earlyPercentage}%`,            icon: Clock,         color: 'text-emerald-400', bg: 'bg-emerald-500/10', dot: '#34d399' },
-          { label: 'Late',             value: `${kpis?.latePercentage}%`,             icon: AlertCircle,   color: 'text-red-400',     bg: 'bg-red-500/10',     dot: '#f87171' },
+          { label: 'Perfect Order Rate', value: `${((summary?.perfectOrderRate || 0) * 100).toFixed(1)}%`, icon: CheckCircle2,  color: 'text-blue-400',    bg: 'bg-blue-500/10',    dot: '#60a5fa' },
+          { label: 'Avg Delay per Delayed', value: `${(summary?.avgDelayDays || 0).toFixed(1)} days`, icon: AlertCircle, color: 'text-rose-400', bg: 'bg-rose-500/10', dot: '#fb7185' },
+          { label: 'Early Deliveries',   value: `${kpis?.earlyPercentage}%`,            icon: Clock,         color: 'text-emerald-400', bg: 'bg-emerald-500/10', dot: '#34d399' },
+          { label: 'Total Tracked',      value: kpis?.totalDeliveries.toLocaleString(), icon: Package,       color: 'text-teal-400',    bg: 'bg-teal-500/10',    dot: '#2dd4bf' },
         ].map(kpi => (
           <div key={kpi.label} className="glass-card p-5 flex items-center gap-4">
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${kpi.bg}`}>
